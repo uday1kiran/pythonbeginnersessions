@@ -1,0 +1,126 @@
+    server:
+      port: 9010
+
+    logging:
+      #config: D:/logback.xml
+      level.com.cvs.mfe: DEBUG
+      level.io.micrometer.influx: DEBUG
+
+    spring:
+      output:
+        ansi:
+          enabled: ALWAYS
+      profiles:
+        active: "safety-stock-consumer"
+      main:
+        banner-mode: log
+        web-environment: false
+        webflux:
+        dateFormat: "yyyy-MM-dd"
+
+    management:
+      metrics:
+        distribution:
+          percentiles-histogram:
+            "[http.server.requests]": true
+          percentiles:
+            "[http.server.requests]": 0.95, 0.98, 0.99
+        web:
+          server:
+            auto-time-requests: true
+        export:
+          elastic:
+            enabled: false
+          newRelic:
+            enabled: false
+          influx:
+            enabled: false
+
+    kafka:
+      consumer:
+        commit.interval: 5s
+        commit.batch.size: 0
+        spring.json.trusted.packages: "*"
+        spring.json.use.type.headers: false
+        retry.limit: 3
+        retry.backoff.initial: 10s
+        retry.backoff.max: 1m
+        max.poll.interval.ms: 3000000
+        bootstrap.servers: ${KAFKA_BOOTSTRAP_SERVERS}
+        security.protocol: ${KAFKA_SECURITY_PROTOCOL}
+        ssl.key.password: ${KAFKA_SSLKEY_PASSWORD}
+        ssl.keystore.location: ${KAFKA_KEYSTORE_FILE}
+        ssl.keystore.password: ${KAFKA_KEYSTORE_PASSWORD}
+        ssl.truststore.location: ${KAFKA_TRUSTSTORE_FILE}
+        ssl.truststore.password: ${KAFKA_TRUSTSTORE_PASSWORD}
+        sasl.mechanism: ${KAFKA_SASL_MECHANISM}
+        sasl.jaas.config: org.apache.kafka.common.security.plain.PlainLoginModule required username="brokeruser" password="brokerusersecret";
+        ssl.endpoint.identification.algorithm:
+        key.deserializer: com.yantriks.ypfp.common.core.kafka.JacksonDeserializer
+        value.deserializer: com.yantriks.ypfp.common.core.kafka.JacksonDeserializer
+        group.id: safetystock-service-application-api-local
+        auto.offset.reset: latest
+        enabled: true
+        ack:
+          exceptions: java.lang.Throwable
+        dlq-publish:
+          enabled: true
+        retry:
+          limit: 3
+          backoff:
+            max: 1m
+            initial: 10s
+      producer:
+        key.serializer: com.yantriks.ypfp.common.core.kafka.JacksonSerializer
+        value.serializer: com.yantriks.ypfp.common.core.kafka.JacksonSerializer
+        enabled: true
+        bootstrap.servers: ${KAFKA_BOOTSTRAP_SERVERS}
+        security.protocol: ${KAFKA_SECURITY_PROTOCOL}
+        ssl.key.password: ${KAFKA_SSLKEY_PASSWORD}
+        ssl.keystore.location: ${KAFKA_KEYSTORE_FILE}
+        ssl.keystore.password: ${KAFKA_KEYSTORE_PASSWORD}
+        ssl.truststore.location: ${KAFKA_TRUSTSTORE_FILE}
+        ssl.truststore.password: ${KAFKA_TRUSTSTORE_PASSWORD}
+        sasl.mechanism: ${KAFKA_SASL_MECHANISM}
+        sasl.jaas.config: org.apache.kafka.common.security.plain.PlainLoginModule required username="brokeruser" password="brokerusersecret";
+        ssl.endpoint.identification.algorithm:
+        max.in.flight.requests.per.connection: 100
+        acks: all
+
+    api:
+      server:
+        url: http://yso-common-app-internal
+
+    streamer:
+      topic-name: integration-external-storesafetystock
+      rest-endpoint: /product-location-services/product-location-fulfillment-type
+      safetystock:
+        org-id: CVSHealth
+        location-type: Store
+        uom: EACH
+        selling-channel: CVSONLINE
+        fulfillment-types: SHIP,PICK,DELIVERY
+        plft:
+          template-endpoint: /{orgId}/{productId}/{uom}/{locationType}/{locationId}/{sellingChannel}/{fulfillmentType}
+      bootstrap.servers: ${KAFKA_BOOTSTRAP_SERVERS}
+      security.protocol: ${KAFKA_SECURITY_PROTOCOL}
+      ssl.key.password: ${KAFKA_SSLKEY_PASSWORD}
+      ssl.keystore.location: ${KAFKA_KEYSTORE_FILE}
+      ssl.keystore.password: ${KAFKA_KEYSTORE_PASSWORD}
+      ssl.truststore.location: ${KAFKA_TRUSTSTORE_FILE}
+      ssl.truststore.password: ${KAFKA_TRUSTSTORE_PASSWORD}
+      sasl.mechanism: ${KAFKA_SASL_MECHANISM}
+      sasl.jaas.config: org.apache.kafka.common.security.plain.PlainLoginModule required username="brokeruser" password="brokerusersecret";
+      ssl.endpoint.identification.algorithm:
+      num.stream.threads: 3
+      window-size-seconds: 5
+      window-grace-period-seconds: 2
+      auto.offset.reset: latest
+      commit.interval.ms: 7000  # window size + window grace period in milliseconds
+      cache.max.bytes.buffering: 10485760 #10 MB
+
+    ypfp:
+      consume:
+        region: us
+      customer-name: CVSHealth
+

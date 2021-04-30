@@ -1,0 +1,9 @@
+apiVersion: v1
+data:
+  application.yml: ''
+kind: ConfigMap
+metadata:
+  labels:
+    app.kubernetes.io/instance: common
+  name: safety-stock-streamer-config
+  namespace: yantriks-dev
